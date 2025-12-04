@@ -167,12 +167,13 @@ DQN 的 Temporal Difference (TD) 目標為：
 ## 7. Toy Model 的完整流程（Perception → Action）
 
 輸入 x (20 維)
-↓ EmotionClassifier
-情緒 e ∈ {0,1,2}
-↓ PolicyNet (DQN)
-選擇策略 a ∈ {0,1,2,3}
 ↓
-使用 reward 更新策略
+EmotionClassifier 預測情緒 e ∈ {0,1,2}
+↓
+PolicyNet (DQN) 選擇策略 a ∈ {0,1,2,3}
+↓
+根據 reward 更新策略
+
 
 這是一個完整的 AI 對話「理解 → 決策」架構。
 
