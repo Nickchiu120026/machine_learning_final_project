@@ -1,172 +1,134 @@
-# Final Project：Toy Model — 多模態情緒理解與策略選擇
+# Toy Model — 一維抽象情緒線索的情緒分類與策略選擇
 
-本專案的核心問題是：未來的人工智慧是否能「理解人類的動機、情緒與價值」，並且根據使用者的潛在心理狀態主動做出合適協作？  
-這是一個非常困難的目標，因此我設計了一個 **Toy Model（簡化版模型）**，用於模擬未來能力的最小可行雛形。本模型包含兩大部分：
+本專案實作一個極簡的 **Toy Model（簡化模型）**，用以展示未來 AI 可能具備的兩大能力：
 
-- 多模態情緒分類（Perception）  
-- 策略選擇強化學習（Action / RL）
+1. **理解能力（Perception）**：從訊號推測使用者情緒  
+2. **行動能力（Action）**：根據情緒選擇適合的回應策略  
 
-本模型的目的不是完美複製真實世界的對話 AI，而是建立一個能「測試觀念、可運行、可評估」的架構。
-
----
-
-## 1. Toy Model 的目的
-
-Toy Model 要做的事情，是把未來「理解人 → 主動協作」的複雜行為，拆解成目前可實作的最小雛形：
-
-1. 讓 AI 接收簡化的多模態資料  
-2. 推測使用者的情緒狀態  
-3. 根據情緒選擇回應策略  
-4. 使用強化學習優化策略品質  
-
-這個流程建立了未來 AI 會需要的兩大能力：**理解（Perception）** 與 **行動（Decision-Making）**。
+為符合 Toy Model 的設計精神，本模型刻意不使用真實語音、影像或文本，而是將「人類情緒線索」抽象化成一個 **1 維連續值**，以最小複雜度重現「理解 → 決策」的 AI 基本流程。
 
 ---
 
-## 2. Toy Model 的輸入與輸出
+# 📌 1. Toy Model 的概念
 
-### 輸入：20 維多模態向量
+本 Toy Model 的核心理念是：
 
-Toy Model 的資料由三種模態組成（以隨機向量模擬）：
+> 用最簡化的設定呈現 AI 如何從一個訊號理解人類狀態，並選擇合適行為。
 
-- 語音特徵：5 維  
-- 臉部特徵：5 維  
-- 文本 embedding：10 維  
+因此輸入不需要真實資料，而是用一個簡單的數值 \( x ∈ R^1 \) 來表示人類情緒強度，例如：
 
-組合成：
+- x < -0.3 → 負向  
+- -0.3 ≤ x ≤ 0.3 → 平靜  
+- x > 0.3 → 焦慮  
 
-x ∈ R^20
+EmotionClassifier 根據 x 推測情緒狀態（0,1,2），再由 PolicyNet（DQN）選擇策略（0~3）。
 
 ---
 
-### 輸出（兩部分）
+# 📌 2. 模型輸入 / 輸出
 
-#### (A) EmotionClassifier — 情緒分類輸出
+## **輸入：一維情緒線索**
 
-| 類別 | 意義 |
-|------|------|
+x ∈ R^1
+
+這個數值代表「抽象化後的情緒強度」，是多模態情緒訊號的簡化版本。
+
+---
+
+## **EmotionClassifier（分類模型）輸出：情緒類別 e**
+
+| e | 意義 |
+|---|------|
 | 0 | 平靜 Calm |
 | 1 | 焦慮 Anxious |
 | 2 | 負向 Negative |
 
-#### (B) PolicyNet（DQN）— 行為策略輸出
-
-| action | 回應策略 | 說明 |
-|--------|----------|------|
-| 0 | 安撫 Soothing | 降低情緒 |
-| 1 | 資訊 Informative | 提供資訊 |
-| 2 | 引導 Guiding | 引導使用者思考 |
-| 3 | 支持 Supportive | 給予支持 |
-
-這兩個輸出合在一起，就形成 Toy Model 的完整「理解 → 回應」流程。
+EmotionClassifier 是一個小型 MLP，用於示範 AI 的「理解能力」。
 
 ---
 
-## 3. 使用到的神經網路架構
+## **PolicyNet（DQN）輸出：策略 action**
 
-### 3.1 EmotionClassifier（情緒分類）
+| action | 策略類型 | 說明 |
+|--------|-----------|------|
+| 0 | 安撫 Soothing | 放鬆語氣、降低緊張 |
+| 1 | 資訊 Informative | 提供具體資訊 |
+| 2 | 引導 Guiding | 協助釐清想法 |
+| 3 | 支持 Supportive | 情感支持 |
 
-使用三層全連接神經網路（MLP）：
+這代表 AI 對使用者狀態所做出的「回應選擇」。
 
-Input (20)  
-↓ Linear(20 → 32)  
+---
+
+# 📌 3. 神經網路架構
+
+## **EmotionClassifier（分類器）**
+
+Input (1)  
+↓ Linear 1→16  
 ReLU  
-↓ Linear(32 → 16)  
-ReLU  
-↓ Linear(16 → 3)  
+↓ Linear 16→3  
 Output (3 logits)  
 
-這對應到真實世界的「多模態情緒理解」任務。
+用途：從 x 判斷情緒類別。
 
 ---
 
-### 3.2 PolicyNet（DQN）
+## **PolicyNet（DQN 策略網路）**
 
-DQN 策略網路結構如下：
+Input (情緒 e: 1 維)  
+↓ Linear 1→16  
+ReLU  
+↓ Linear 16→4  
+Output Q-values for 4 actions  
 
-Input (情緒 e: 1 維)
-↓ Linear(1 → 16)
-ReLU
-↓ Linear(16 → 4)
-Output Q-values for 4 strategies
-
-
-輸出為四個策略的 Q-value。
+用途：選擇最高 Q-value 的策略。
 
 ---
 
-## 4. Loss Function（兩種）
+# 📌 4. Loss Function
 
-### 4.1 EmotionClassifier 的 Loss  
-➡ **CrossEntropyLoss**
+本專案使用兩種 Loss（符合作業要求）：
 
-用於衡量：
-
-- 模型輸出的三類 logits  
-- 正確的情緒標籤  
-
-這是分類任務的標準 Loss。
-
----
-
-### 4.2 PolicyNet（DQN）的 Loss  
-➡ **MSELoss（均方誤差）**
-
-DQN 的 Temporal Difference (TD) 目標為：
+### **(1) CrossEntropyLoss — EmotionClassifier**
+用於多類情緒分類：
 
 \[
-\text{target} = r + \gamma \max Q(s', a')
+\text{Loss} = -\sum y \log(\hat{y})
 \]
 
-模型會最小化：
+### **(2) MSELoss — DQN 策略學習**
+DQN 的 TD target：
+
+\[
+\text{target} = r + \gamma \max_a Q(s', a)
+\]
+
+策略網路最小化：
 
 \[
 (Q(s, a) - \text{target})^2
 \]
 
-因此使用 MSELoss 逼近 TD target。
+---
+
+# 📌 5. 強化學習 Reward 設計
+
+模擬使用者被 AI 回應後的變化：
+
+- 策略合適 → **+1**
+- 策略不合適 → **-1**
+- 對話中斷 → **-2**
+
+這讓 AI 能透過強化學習學習「更適合的回應行為」。
 
 ---
 
-## 5. 強化學習中的 Reward 設計
+# 📌 6. 模型流程（Perception → Action）
 
-為了模擬「使用者被回應後的情緒變化」，Toy Model 設計了：
+以下是完整流程（每行一句，適合 README）：
 
-- 策略適合情緒 → +1  
-- 策略不適合 → -1  
-- 對話中斷（不舒服） → -2  
-
-這個 reward system 讓 AI 學會：
-
-- 焦慮 → 使用安撫  
-- 負向 → 使用支持  
-- 平靜 → 使用資訊  
-
-策略會透過反覆試錯越來越合理。
-
----
-
-## 6. 模型是否有進行優化？
-
-是的，Toy Model 具備基本優化機制：
-
-### EmotionClassifier
-- 使用 **Adam optimizer**  
-- 使用 **CrossEntropyLoss** 更新分類能力  
-
-### DQN PolicyNet
-- 使用 **Adam optimizer**  
-- **MSELoss** 更新 Q-value  
-- 採用 **epsilon-greedy 探索策略**（20% 隨機）  
-- 使用 **TD Target** 更新策略  
-
-這些優化方法能讓模型在短時間內收斂。
-
----
-
-## 7. Toy Model 的完整流程（Perception → Action）
-
-輸入 x (20 維)  
+輸入 x (1 維)  
 ↓  
 EmotionClassifier 預測情緒 e ∈ {0,1,2}  
 ↓  
@@ -174,38 +136,4 @@ PolicyNet (DQN) 選擇策略 a ∈ {0,1,2,3}
 ↓  
 根據 reward 更新策略  
 
-這是一個完整的 AI 對話「理解 → 決策」架構。
-
 ---
-
-## 8. Toy Model 的成功性
-
-### 概念代表性
-- 多模態訊號  
-- 情緒推測  
-- RL 行為選擇  
-- 回饋式學習  
-
-### 可測試性
-- 情緒分類準確度  
-- 策略 reward 是否提升  
-- End-to-end 行為是否合理  
-
-### 可行性
-- 資料可立即生成  
-- 訓練快速（幾秒至十秒）  
-- 結構簡單、易於調整  
-
-因此它是非常標準的 *Solvable Model*。
-
----
-
-## 10. 結語
-
-這份 Toy Model 展示了未來「能理解人類動機並主動協作的 AI」的第一步。  
-雖然是簡化版，但它成功展現了：
-
-- **理解能力（Perception）**  
-- **協作能力（Decision Making）**  
-
-它是一個能運行、能展示、能測試的完整雛形，呈現了未來人性化人工智慧的基礎概念。
