@@ -68,13 +68,13 @@ x ∈ R^20
 
 使用三層全連接神經網路（MLP）：
 
-Input (20)
-↓ Linear(20 → 32)
-ReLU
-↓ Linear(32 → 16)
-ReLU
-↓ Linear(16 → 3)
-Output (3 logits)
+Input (20)  
+↓ Linear(20 → 32)  
+ReLU  
+↓ Linear(32 → 16)  
+ReLU  
+↓ Linear(16 → 3)  
+Output (3 logits)  
 
 這對應到真實世界的「多模態情緒理解」任務。
 
