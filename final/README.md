@@ -98,7 +98,7 @@ $$
 \mathcal{L}_{\text{CE}} = -\sum_i y_i \log \hat{y}_i
 $$
 
-其中 \( y_i \) 為真實標籤的 one-hot 向量，\( \hat{y}_i \) 為模型輸出的機率分佈。
+其中 $ y_i $ 為真實標籤的 one-hot 向量，$ \hat{y}_i $ 為模型輸出的機率分佈。
 
 ---
 
