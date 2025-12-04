@@ -1,106 +1,124 @@
-# Toy Model for “AI Understanding Human Motivation and Proactive Collaboration”
+# Toy Model 報告介紹（1000–1500 字）
 
-This project implements a **minimal viable toy model** that simulates two core abilities
-required for future human-centered AI systems:
+在這份期末專案中，我嘗試探索一個我認為將會在未來二十年內成為人工智慧核心能力的方向：**AI 是否能真正「理解人」並且「主動協作」？**  
+也就是說，未來的 AI 不僅要能分析資料或生成語言，它還需要讀懂人類的情緒、動機與價值，並根據這些潛在狀態做出合適的回應。這樣的 AI 才能成為真正的生活協作者，而不是目前只能被動回應的工具。
 
-1. **Perception** — understanding human emotional states from multimodal signals  
-2. **Action** — choosing an appropriate response strategy using reinforcement learning  
+然而，要打造能理解人類動機的強大 AI 在現在的技術條件下仍然非常困難。因此，本專案的目標並不是完全實現這樣的能力，而是設計一個**Toy Model（簡化版模型）**，讓這種複雜能力能在目前的時間內被「部分模擬、部分測試、部分驗證」。換句話說，我不是要打造未來的服務型 AI，而是要建立它的「最小可行雛形」。
 
-This toy model serves as a simplified, testable version of the long-term goal described in  
-the final project:  
-> “An AI system capable of understanding human motivations, emotions, and values,  
-> and proactively collaborating with humans.”
+這個 Toy Model 由兩個主要能力組成：  
+**(1) 多模態情緒理解（Perception）**  
+**(2) 策略選擇與回應行為（Action / RL）**
 
 ---
 
-# 📌 1. Model Overview
+## 一、為什麼需要情緒理解？
 
-The toy model consists of two components:
+在現實中，人的動機不會明確地寫在文本裡，而會從語音抖動、臉部表情、文字潛台詞等多個模態同時透露出來。因此，我設計了第一個模型：**EmotionClassifier**。它的工作是：
 
-## **(A) EmotionClassifier — Multimodal Emotion Understanding**
-Input:  
-- A 20-dimensional concatenated vector representing:  
-  - 5-dim voice features  
-  - 5-dim facial features  
-  - 10-dim text embedding  
+- 接收一筆「模擬的多模態特徵」  
+- 從中推測使用者處於哪一種情緒狀態  
 
-Output:  
-- Emotion class:  
-  - `0 = Calm`  
-  - `1 = Anxious`  
-  - `2 = Negative`  
+雖然真實世界的多模態資料需要專業資料集來蒐集，但為了適應十週作業需求，我改用：
 
-This models the **multimodal perception** stage in a simplified form.
+- 5 維語音特徵（取代聲音）  
+- 5 維臉部特徵（取代表情）  
+- 10 維文字 embedding（取代語意）  
 
----
+組合成一個 **20 維向量** 作為模型的輸入。這個向量象徵人類的多模態訊號，而分類模型會將其分類為：
 
-## **(B) PolicyNet (DQN) — Response Strategy Selection**
-Input:  
-- Emotion label (0, 1, or 2)
+- 0：平靜  
+- 1：焦慮  
+- 2：負向  
 
-Output:  
-- Response strategy (0–3)
-
-| Strategy ID | Response Type |
-|-------------|----------------|
-| 0 | Soothing |
-| 1 | Informative |
-| 2 | Guiding |
-| 3 | Supportive |
-
-These strategies represent different styles of empathetic assistance.
-
-The model is trained using **Q-learning** with a small simulated environment.
-
-Reward Rules:
-- Emotional improvement → `+1`  
-- Emotional worsening → `-1`  
-- Conversation interruption → `-2`
+這一步被視為「理解」的能力：未來的 AI 若想跟人建立長期互信合作，讀懂情緒是最基本的能力，而這個情緒分類器就是對應未來能力的簡化版。
 
 ---
 
-# 📌 2. End-to-End Input / Output
+## 二、為什麼需要策略選擇？
 
-### **Input to entire system**
-A 20-dimensional multimodal feature vector (voice + face + text).
+只有理解情緒並不代表 AI 能真正幫助人。  
+因此 Toy Model 第二個部分使用了 **Q-learning（DQN）** 來模擬「選擇回應策略」的行為。
 
-### **Outputs**
-1. **Predicted Emotion** (0/1/2)  
-2. **Chosen Strategy** (0/1/2/3)  
-3. **Strategy Meaning** (e.g., “Soothing”, “Guiding”)  
+模型會輸入情緒類別（0/1/2），然後從四種策略中選擇一個：
 
-These outputs represent whether the toy model can:
-- *Understand* human emotional states  
-- *Act* by selecting a context-appropriate supportive strategy  
+- 0：安撫（Soothing）  
+- 1：資訊（Informative）  
+- 2：引導（Guiding）  
+- 3：支持（Supportive）  
 
----
-
-# 📌 3. Why These Outputs Matter
-
-### **Emotion Output → Perception Ability**
-This output tests whether the model can “read” human signals.  
-It acts as the **state** for reinforcement learning.
-
-### **Strategy Output → Proactive Collaboration**
-This output evaluates the AI's ability to take actions that help the user.  
-It enables measurement of:
-- emotional improvement,  
-- conversation continuation,  
-- appropriateness of response.  
-
-Together they form a minimal working prototype of a **human-aware AI system**.
+這些策略象徵 AI 在真實對話中可能採取的不同風格，就像現代 ChatGPT 已經會根據語氣做調整，而未來版本更應該依照人類的情緒狀態調整策略。
 
 ---
 
-# 📌 4. Code Overview
+## 三、強化學習如何讓策略變「更好」？
 
-The entire implementation is in one block for simplicity.  
-It includes:
-- dataset simulation,  
-- emotion classifier training,  
-- DQN training,  
-- final demo.
+為了讓 AI 學習到什麼回應方式比較有用，我設計了一個簡單但有效的模擬環境（environment）。  
+環境會根據「情緒 × 策略」組合給出回饋：
+
+- 若策略適合情緒 → +1  
+- 若策略不適合 → -1  
+- 若對話被中斷（模擬使用者感到不舒服） → -2  
+
+這個 reward system 會引導 AI 選擇「更能改善情緒」的策略。  
+例如：
+
+- 使用者焦慮時，安撫策略通常有效  
+- 使用者負向時，支持策略可能更適合  
+
+經過數百回合，模型會逐漸學會「看到某種情緒時應該選哪一種策略」，這正是未來主動協作 AI 會需要的能力。
 
 ---
 
+## 四、兩個模型如何串在一起？
 
+整個 Toy Model 的流程如下：
+
+1. **輸入一筆 20 維多模態特徵**  
+2. EmotionClassifier 推測情緒（例如：焦慮）  
+3. DQN 根據該情緒輸出策略（例如：引導型）  
+4. Toy Model 報告結果：  
+   - Predicted Emotion = 1（焦慮）  
+   - Selected Strategy = 2（引導）  
+   - Strategy Meaning = “Guiding”  
+
+這個流程模擬了「理解 → 行動」的完整過程。
+
+雖然資料是人工生成的，但模型的邏輯與未來真實 AI 使用到的架構是一致的：  
+多模態理解用於 perception，深度強化學習用於 decision making。
+
+---
+
+## 五、為什麼這個 Toy Model 是成功的？
+
+### (1) 概念代表性（Conceptual Representativeness）  
+Toy Model 重現了真實 AI 的核心想法：
+
+- 人類訊號是多模態的  
+- 情緒是隱藏狀態  
+- AI 必須根據情緒決策  
+- 回饋決定策略是否成功  
+
+### (2) 可測試性（Testability）  
+這個模型能測試：
+
+- 情緒分類器的準確度  
+- RL 策略是否能改善情緒  
+- 整體模型是否能做出「看起來有同理心」的行為  
+
+### (3) 可行性（Feasibility）  
+你可以在短時間內生成資料並訓練模型，完整地跑出 end-to-end 的示範。  
+因此它完全符合作業要求的「Solvable Model」。
+
+---
+
+# 結語
+
+這份 Toy Model 的核心貢獻不在於技術複雜度，而在於它成功地把一個 20 年後的願景拆解成現在可行的雛形：  
+讓 AI 在最簡化的狀態下，**先能理解人、再能幫助人**。
+
+透過：
+- 多模態情緒分類  
+- 策略選擇強化學習  
+- 合理的 reward 設計  
+
+這個模型展示了未來人性化 AI 的第一步，也是對「AI 主動協作能力」最具體的示範。
