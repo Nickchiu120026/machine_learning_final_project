@@ -86,29 +86,36 @@ Output Q-values for 4 actions
 
 ---
 
-# 📌 4. Loss Function
+## 4. Loss Function
 
 本專案使用兩種 Loss（符合作業要求）：
 
-### **(1) CrossEntropyLoss — EmotionClassifier**
-用於多類情緒分類：
+### (1) CrossEntropyLoss — EmotionClassifier
 
-\[
-\text{Loss} = -\sum y \log(\hat{y})
-\]
+用於多類情緒分類，目標函數為：
 
-### **(2) MSELoss — DQN 策略學習**
-DQN 的 TD target：
+$$
+\mathcal{L}_{\text{CE}} = -\sum_i y_i \log \hat{y}_i
+$$
 
-\[
+其中 \(y_i\) 為真實標籤的 one-hot 向量，\(\hat{y}_i\) 為模型輸出的機率分佈。
+
+---
+
+### (2) MSELoss — DQN 策略學習
+
+DQN 的 TD target 定義為：
+
+$$
 \text{target} = r + \gamma \max_a Q(s', a)
-\]
+$$
 
-策略網路最小化：
+策略網路最小化的目標為：
 
-\[
-(Q(s, a) - \text{target})^2
-\]
+$$
+\mathcal{L}_{\text{DQN}} = \bigl(Q(s, a) - \text{target}\bigr)^2
+$$
+
 
 ---
 
