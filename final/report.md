@@ -88,7 +88,7 @@ Output Q-values for 4 actions
 
 ## 4. Loss Function
 
-本專案使用兩種 Loss（符合作業要求）：
+本專案使用兩種 Loss：
 
 ### (1) CrossEntropyLoss — EmotionClassifier
 
